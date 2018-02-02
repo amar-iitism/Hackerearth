@@ -1,0 +1,92 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long int
+ll dp[13][2525][515];
+ll d[13],val[10];
+ll l,r;
+#define LCM 2520
+ll powmod(ll a,ll b)
+{
+  ll x=1,y=a;
+  while(b>0)
+  {
+   if(b%2)
+   x=(x*y)%LCM;
+   y=(y*y)%LCM;
+   b=b/2;
+  }
+  return x;
+}
+
+void pre()
+{
+  ll i;
+  val[0]=0;
+  for(int i=1;i<10;i++)
+  {
+   val[i]=powmod(i,i);
+  }
+}
+
+ll compute(ll i,ll sum,ll bitmask,int tight)
+{
+  ll j;
+  if(i==-1)
+  {
+   ll c=0,p=0;
+   for(j=1;j<10;j++)
+   {
+    if(bitmask & (1<<(j-1)))
+    {
+     p++;
+     if(sum%j==0)
+      c++;
+    }
+   }
+   if(c==p)
+   return 1;
+   return 0;
+  }
+  if(tight==0 && dp[i][sum][bitmask]!=-1)
+  {
+   return dp[i][sum][bitmask];
+  }
+  ll ans=0,e=9,f;
+  if(tight)
+  e=d[i];
+  for(j=0;j<=e;j++)
+  {
+   f=bitmask;
+   if(j)
+   f=(f | (1<<(j-1)));
+   ans+=compute(i-1,(sum+val[j])%LCM,f,(tight & (j==e)));
+  }
+  if(tight==0)
+  dp[i][sum][bitmask]=ans;
+  return ans;
+}
+
+int solve(ll n)
+{
+  ll l=0;
+  while(n>0)
+  {
+   d[l++]=n%10;
+   n/=10;
+  }
+  memset(dp,-1,sizeof(dp));
+  return compute(l-1,0,0,1);
+}
+
+
+int main()
+{
+  ll t;
+  cin>>t;
+  pre();
+  while(t--)
+  {
+   cin>>l>>r;
+   cout<<solve(r)-solve(l-1)<<endl;
+  }
+}
