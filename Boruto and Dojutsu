@@ -1,0 +1,128 @@
+#include<bits/stdc++.h>
+using namespace std;
+int n,ml,q;
+map<pair<int,int>,int > m;
+vector<pair<int,int>> v,vt;
+int p[100007],sizel[100007];
+int color[100007][101];
+int arr[100007];
+vector<int> ans;
+void inti()
+{
+  for(int i=0;i<100007;i++)
+  {
+   p[i]=i;
+   sizel[i]=1;
+   for(int j=0;j<101;j++)
+    color[i][j]=0;
+  }
+}
+int root(int x)
+{
+  while(p[x]!=x)
+  {
+   p[x]=p[p[x]];
+   x=p[x];
+  }
+  return x;
+}
+
+void unionl(int a,int b)
+{
+  int x=root(a);
+  int y=root(b);
+  //cout<<"x="<<x<<"  y="<<y<<endl;
+  if(sizel[x]>=sizel[y])
+  {
+   p[y]=x;
+   sizel[x]+=sizel[y];
+   for(int i=0;i<101;i++)
+   {
+       color[x][i]=color[x][i] | color[y][i] ;
+   }
+  }
+  else
+  {
+   p[x]=y;
+   sizel[y]+=sizel[x];
+   for(int i=0;i<101;i++)
+   {
+       color[y][i]=color[x][i] | color[y][i] ;
+   }
+  }
+}
+
+
+
+
+int main()
+{ inti();
+  cin>>n>>ml>>q;
+  for(int i=1;i<=n;i++)
+    {cin>>arr[i];
+    color[i][arr[i]]=1;}
+  for(int i=0;i<ml;i++)
+  {
+   int a,b;
+   cin>>a>>b;
+   v.push_back({a,b});
+  }
+
+  for(int i=0;i<q;i++)
+  {
+    int d,e;
+    cin>>d>>e;
+    vt.push_back({d,e});
+    if(d==1)
+    {
+     e--;
+    int k1=v[e].first;
+    int k2=v[e].second;
+    m[{k1,k2}]=-1;
+    }
+  }
+  int zt=v.size();
+  for(int i=0;i<zt;i++)
+  {
+   int a,b;
+   a=v[i].first;
+   b=v[i].second;
+   if(m[{a,b}]!=-1)
+   { //cout<<"a="<<a<<"  b="<<b<<endl;
+     //cout<<"root a="<<root(a)<<" root b="<<root(b)<<endl;
+    if(root(a)!=root(b))
+    { //cout<<"union"<<endl;
+     unionl(a,b);
+    }
+   }
+  }
+  for(int i=q-1;i>=0;i--)
+  {
+    int ind=vt[i].first;
+    int kk=vt[i].second;
+
+    if(ind==1)
+    {
+     int z1=v[kk-1].first;
+     int z2=v[kk-1].second;
+     if(root(z1)!=root(z2))
+     unionl(z1,z2);
+    }
+    else
+    {
+     int kio=root(kk);
+     int dd=0;
+     for(int w=0;w<101;w++)
+     {
+         if(color[kio][w]==1)
+            dd++;
+     }
+     ans.push_back(dd);
+    }
+  }
+  int kj=ans.size();
+  for(int i=kj-1;i>=0;i--)
+  {
+      cout<<ans[i]<<endl;
+  }
+}
