@@ -1,0 +1,29 @@
+#include<bits/stdc++.h>
+using namespace std;
+int n;
+int main()
+{
+  int t;
+  cin>>t;
+  while(t--)
+  {
+   cin>>n;
+   long long int ans=0;
+   for(int i=1;i<=sqrt(n);i++)
+   {  if(n%i==0){
+     if(n/i == i)
+     { if(i%2!=0)
+       ans+=i;
+     }
+     else
+     {
+      if(i%2!=0)
+      ans+=i;
+      if((n/i)%2!=0)
+      ans+=(n/i);
+     }
+     }
+   }
+   cout<<ans<<endl;
+  }
+}
