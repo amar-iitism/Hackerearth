@@ -1,0 +1,187 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long int
+#define maxN 100000
+#define mod 1000000007LL
+
+ll n;
+ll arr[maxN+5];
+ll tree[3*maxN+5][11];
+ll lazy[3*maxN+5];
+ll C[11][11];
+
+ll powmod(ll a,ll b)
+{
+  ll x=1,y=a;
+  while(b>0)
+  {
+      if(b%2)
+        x=(x*y)%mod;
+      y=(y*y)%mod;
+      b=b/2;
+  }
+  return x;
+}
+
+void combi()
+{ memset(C,0,sizeof(C));
+  C[0][0]=1;
+  for(int i=1;i<=10;i++)
+  {
+   C[i][0]=1;
+   for(int j=1;j<=i;j++)
+   {
+    C[i][j]=C[i-1][j]+C[i-1][j-1];
+    C[i][j]%=mod;
+   }
+  }
+}
+
+void build(ll index,ll low,ll high)
+{
+  if(low==high)
+  {
+   ll x=arr[low]%mod;
+   for(ll k=0;k<11;k++)
+   tree[index][k]=powmod(x,k);
+   return;
+  }
+  ll mid=(low+high)/2;
+  build(2*index+1,low,mid);
+  build(2*index+2,mid+1,high);
+  for(ll k=0;k<=10;k++)
+  {
+   tree[index][k]=(tree[2*index+1][k]+tree[2*index+2][k])%mod;
+  }
+  return;
+}
+
+void update_lazy(ll index,ll low,ll high)
+{
+  if(!lazy[index])
+  return;
+  ll f[11];
+    ll x=lazy[index]%mod;
+    for(ll i=1;i<=10;i++)
+    {
+     ll s=0;
+     for(ll j=0;j<=i;j++)
+     {
+      s=(s+(((C[i][i-j]*powmod(x,i-j))%mod)*tree[index][j])%mod)%mod;
+     }
+     f[i]=s;
+    }
+    for(int i=1;i<11;i++)
+        tree[index][i]=f[i];
+  if(low!=high)
+  {
+   lazy[2*index+1]+=lazy[index];
+   lazy[2*index+2]+=lazy[index];
+   lazy[2*index+1]%=mod;
+   lazy[2*index+2]%=mod;
+  }
+  lazy[index]=0;
+}
+
+
+
+
+ll query(ll index,ll low,ll high,ll left,ll right,ll k)
+{
+  if(low>high || low>right || high<left)
+  return 0;
+  update_lazy(index,low,high);
+  if(low>=left && high<=right)
+  return tree[index][k];
+  ll mid=(low+high)/2;
+  int p1=query(2*index+1,low,mid,left,right,k);
+  int p2=query(2*index+2,mid+1,high,left,right,k);
+  return (p1+p2)%mod;
+}
+
+
+void update(ll index,ll low,ll high,ll left,ll right,ll val)
+{
+  update_lazy(index,low,high);
+  if(low>high || low>right || high<left)
+  return;
+  if(low>=left && high<=right)
+  {
+    ll x=val%mod;
+    ll f[11];
+   for(int i=1;i<=10;i++)
+    {
+     ll s=0;
+     for(int j=0;j<=i;j++)
+     {
+      s=(s+(((C[i][i-j]*powmod(x,i-j))%mod)*tree[index][j])%mod)%mod;
+     }
+     f[i]=s;
+    }
+     for(int i=1;i<11;i++)
+        tree[index][i]=f[i];
+    if(low!=high)
+  {
+   lazy[2*index+1]+=x;
+   lazy[2*index+2]+=x;
+   lazy[2*index+1]%=mod;
+   lazy[2*index+2]%=mod;
+  }
+    return;
+  }
+  ll mid=(low+high)/2;
+  update(2*index+1,low,mid,left,right,val);
+  update(2*index+2,mid+1,high,left,right,val);
+  for(ll k=0;k<=10;k++)
+  tree[index][k]=(tree[2*index+1][k]+tree[2*index+2][k])%mod;
+}
+
+int main()
+{
+  int t;
+  cin>>t;
+  combi();
+  /*for(int i=0;i<11;i++)
+  {
+      for(int j=0;j<11;j++)
+      {
+          cout<<C[i][j]<<" ";
+      }
+      cout<<endl;
+  }*/
+  while(t--)
+  {
+   memset(tree,0,sizeof(tree));
+   memset(lazy,0,sizeof(lazy));
+   scanf("%lld",&n);
+   for(int i=0;i<n;i++)
+   {
+    scanf("%lld",&arr[i]);
+   }
+   build(0,0,n-1);
+   int q;
+   cin>>q;
+   while(q--)
+   { int casel;
+    cin>>casel;
+    if(casel==1)
+    {
+     int l,k;
+     cin>>l>>k;
+     update(0,0,n-1,l-1,l-1,k);
+    }
+    else if(casel==2)
+    {
+     int l,r,k;
+     cin>>l>>r>>k;
+     update(0,0,n-1,l-1,r-1,k);
+    }
+    else
+    {
+     int l,r,k;
+     cin>>l>>r>>k;
+     cout<<query(0,0,n-1,l-1,r-1,k)<<endl;
+    }
+   }
+  }
+}
